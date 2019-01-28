@@ -155,8 +155,6 @@ def dataset_seperator(img,label,size):
     for i in range(size):
         d = np.linalg.norm(label[i] - label[:, None], axis=-1)
         dist.append(np.sum(d))
-    mean = np.mean(dist)
-    max = np.max(dist)
     K = len(label)-int(len(label)* 0.1)
     threshold = dist
     threshold.sort()
@@ -172,10 +170,11 @@ def dataset_seperator(img,label,size):
     #print(np.shape(cord))
     #print(np.shape(label))
     for i in range(len(img)):
-        d = np.linalg.norm(label[i] - cord[:, None], axis=-1)
+        d = np.linalg.norm(label[i] - cord[:], axis=-1)
         index = np.argmin(d)
         label2.append(index)
     X_train, X_test, y_train, y_test = train_test_split(img, label2, test_size=0.2)
+    print(y_test)
     return X_train, X_test, y_train, y_test,cord
 
 
