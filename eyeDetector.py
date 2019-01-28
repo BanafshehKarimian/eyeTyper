@@ -113,7 +113,7 @@ def LeNet(train_data, train_labels,test_data, test_labels,inps,d):#(32,32,1):
     model.compile(
         #loss="categorical_crossentropy",
         #optimizer=SGD(lr=0.01),
-        loss='mean_absolute_error',#rmsprop
+        loss='categorical_crossentropy',#rmsprop
         optimizer='adam',
         metrics=["accuracy"])
 
@@ -154,28 +154,32 @@ def dataset_seperator(img,label,size):
     dist = []
     for i in range(size):
         d = np.linalg.norm(label[i] - label[:, None], axis=-1)
-        dist.append(d)
+        dist.append(np.sum(d))
     mean = np.mean(dist)
-    max = np.mubuax(dist)
-    thresh = (mean+max)/2
-    classes = []
+    max = np.max(dist)
+    K = len(label)-int(len(label)* 0.1)
+    threshold = dist
+    threshold.sort()
+    thresh = threshold[K]
     cord = []
+    print('thresh')
+    print(thresh)
     for i in range(size):
         if dist[i]>thresh:
-            classes.append(img[i])
             cord.append(label[i])
-    print(len(classes))
+    print(len(cord))
     label2 = []
+    #print(np.shape(cord))
+    #print(np.shape(label))
     for i in range(len(img)):
         d = np.linalg.norm(label[i] - cord[:, None], axis=-1)
         index = np.argmin(d)
         label2.append(index)
     X_train, X_test, y_train, y_test = train_test_split(img, label2, test_size=0.2)
-    return X_train, X_test, y_train, y_test
+    return X_train, X_test, y_train, y_test,cord
 
 
-
-out = np.zeros([42080, 3])
+out = []
 def label_reader(add,size,x):
 
     pos = []
@@ -191,32 +195,22 @@ x = np.array([np.array([1,2,3,4]),np.array([11,12,13,14]),np.array([21,22,23,24]
 y = x.flatten()
 y = y.reshape(3,4)
 print(y)
-#\label, img = dataset_eye_extractor(130,100,100)
 img1 = img_getter('-10.jpg',10267,100,100)
-img2 = img_getter('-20.jpg',10203,100,100)
-img3 = img_getter('-30.jpg',21610,100,100)
-img =img1+img2+img3
+#img2 = img_getter('-20.jpg',10203,100,100)
+#img3 = img_getter('-30.jpg',21610,100,100)
+img =img1#+img2+img3
+out = np.zeros([len(img),3])
 l1 = label_reader('imgs-10',10267,0)
-l2 = label_reader('imgs-20',10203,10267)
-l3 = label_reader('imgs',21610,20470)
+#l2 = label_reader('imgs-20',10203,10267)
+#l3 = label_reader('imgs',21610,20470)
 label = out
 print(np.shape(img))
 print(np.shape(label))
-dataset_seperator(img,label,42080)
-train,test,train_l,test_l= dataset_seperator(img,label,42080)
-#for i in range(len(img)):
-#    if i % 10 == 0:
-##        test.append(img[i])
- #       test_l.append(label[i])
- #   else:
- #       train.append(img[i])
- #       train_l.append(label[i])
-print(np.shape(train))
-print(np.shape(test))
-train_l = np.array(train_l).flatten()
-train_l = train_l.reshape(18423, 3)
-test_l = np.array(test_l).flatten()
-test_l = test_l.reshape(2047, 3)
+#train_l = np.array(train_l).flatten()
+#train_l = train_l.reshape(18423, 3)
+#test_l = np.array(test_l).flatten()
+#test_l = test_l.reshape(2047, 3)
+train, test, train_l, test_l,cord = dataset_seperator(img,label,len(label))
 print(np.shape(train_l))
 print(np.shape(test_l))
-#print(LeNet(np.array(train), np.array(train_l), np.array(test), np.array(test_l), (100, 100, 3), 3))
+#print(LeNet(np.array(train), np.array(train_l), np.array(test), np.array(test_l), (100, 100, 3), 1))
